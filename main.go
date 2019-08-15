@@ -63,21 +63,14 @@ func Up(writer http.ResponseWriter, request *http.Request) {
 	}
 	// 是否校验文件类型
 	if save.Verify {
-		fileType := request.Header.Get("type")
-		if fileType == "" {
-			writer.Write(UploadError(errors.New("missing parameters 'type' in the http request header")))
-			return
-		}
-		err = UploadFileFormatVerify(fileType, path.Ext(fileHeader.Filename))
-		if err != nil {
+		if err = UploadFileFormatVerify(request.Header.Get("type"), path.Ext(fileHeader.Filename)); err != nil {
 			writer.Write(UploadError(err))
 			return
 		}
 	}
 	dateDir := DateDir()
 	dir := fmt.Sprintf("%s%s", save.SaveDir, dateDir)
-	_, err = os.Stat(dir)
-	if err != nil {
+	if _, err = os.Stat(dir); err != nil {
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
 			writer.Write(UploadError(err))
@@ -93,8 +86,7 @@ func Up(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	defer out.Close()
-	_, err = io.Copy(out, file)
-	if err != nil {
+	if _, err = io.Copy(out, file); err != nil {
 		writer.Write(UploadError(err))
 		return
 	}
@@ -142,12 +134,7 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 		}
 		// 是否校验文件类型
 		if saves.Verify {
-			if fileType == "" {
-				writer.Write(UploadError(errors.New("missing parameters 'type' in the http request header")))
-				return
-			}
-			err = UploadFileFormatVerify(fileType, path.Ext(file.Filename))
-			if err != nil {
+			if err = UploadFileFormatVerify(fileType, path.Ext(file.Filename)); err != nil {
 				writer.Write(UploadError(err))
 				return
 			}
@@ -156,8 +143,7 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 	dateDir := DateDir()
 	for _, file := range files {
 		file.Filename = string(Md5([]byte(fmt.Sprintf("%d%d", time.Now().UnixNano(), rand.Intn(10))))) + path.Ext(file.Filename)
-		_, err := SaveUploadFile(file, fmt.Sprintf("%s%s", saves.SaveDir, dateDir))
-		if err == nil {
+		if _, err := SaveUploadFile(file, fmt.Sprintf("%s%s", saves.SaveDir, dateDir)); err == nil {
 			saves.NetDir = append(saves.NetDir, fmt.Sprintf("%s%s", dateDir, file.Filename))
 		}
 	}
@@ -187,8 +173,7 @@ func SaveUploadFile(fh *multipart.FileHeader, destDirectory string) (int64, erro
 	}
 	defer src.Close()
 	// dir is not found , create this dir
-	_, err = os.Stat(destDirectory)
-	if nil != err {
+	if _, err = os.Stat(destDirectory); nil != err {
 		err = os.MkdirAll(destDirectory, os.ModePerm)
 		if err != nil {
 			return 0, err
@@ -259,9 +244,8 @@ func Md5(plainText []byte) []byte {
 
 // UploadFileFormatVerify upload file format verify
 func UploadFileFormatVerify(uploadFileType string, uploadFileSuffix string) error {
-	unknownFileFormat := errors.New(`unknown file format`)
 	if uploadFileSuffix == "" {
-		return unknownFileFormat
+		return errors.New(`unknown file format`)
 	}
 	switch strings.ToLower(uploadFileType) {
 	case "image":
@@ -282,21 +266,18 @@ func UploadFileFormatVerify(uploadFileType string, uploadFileSuffix string) erro
 		return UploadFileFormatVerifyJudge([]string{".zip", ".rar"}, uploadFileSuffix)
 	case "other":
 		return UploadFileFormatVerifyJudge([]string{".html", ".chm"}, uploadFileSuffix)
+	default:
+		return errors.New("unknown file type")
 	}
-	return unknownFileFormat
 }
 
 // UploadFileFormatVerifyJudge upload file format verify judge
 func UploadFileFormatVerifyJudge(lists []string, uploadFileSuffix string) error {
-	inLists := false
 	length := len(lists)
 	for i := 0; i < length; i++ {
 		if uploadFileSuffix == lists[i] {
-			inLists = true
+			return nil
 		}
-	}
-	if inLists {
-		return nil
 	}
 	return errors.New(`unknown file format`)
 }
