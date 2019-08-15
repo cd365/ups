@@ -14,6 +14,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -262,7 +263,7 @@ func UploadFileFormatVerify(uploadFileType string, uploadFileSuffix string) erro
 	if uploadFileSuffix == "" {
 		return unknownFileFormat
 	}
-	switch uploadFileType {
+	switch strings.ToLower(uploadFileType) {
 	case "image":
 		return UploadFileFormatVerifyJudge([]string{".png", ".jpg", ".jpeg", ".gif", ".psd", ".swf", ".bmp", ".emf"}, uploadFileSuffix)
 	case "icon":
@@ -282,26 +283,22 @@ func UploadFileFormatVerify(uploadFileType string, uploadFileSuffix string) erro
 	case "other":
 		return UploadFileFormatVerifyJudge([]string{".html", ".chm"}, uploadFileSuffix)
 	}
-	return errors.New(`unknown file format`)
+	return unknownFileFormat
 }
 
 // UploadFileFormatVerifyJudge upload file format verify judge
 func UploadFileFormatVerifyJudge(lists []string, uploadFileSuffix string) error {
-	unknownFileFormat := errors.New(`unknown file format`)
+	inLists := false
 	length := len(lists)
 	for i := 0; i < length; i++ {
-		if i == length-1 {
-			if uploadFileSuffix != lists[i] {
-				return unknownFileFormat
-			}
-		}
-		if uploadFileSuffix != lists[i] {
-			continue
-		} else {
-			break
+		if uploadFileSuffix == lists[i] {
+			inLists = true
 		}
 	}
-	return nil
+	if inLists {
+		return nil
+	}
+	return errors.New(`unknown file format`)
 }
 
 // UploadError upload error
