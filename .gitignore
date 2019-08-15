@@ -1,0 +1,7 @@
+*.log
+*.exe
+*.exe*
+*.a
+*.so
+*.out
+.idea
