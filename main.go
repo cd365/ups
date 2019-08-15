@@ -51,20 +51,25 @@ func Up(writer http.ResponseWriter, request *http.Request) {
 	save := NewSave(&Save{Verify: false})
 	file, fileHeader, err := request.FormFile(save.HTMLFormFileName)
 	if err != nil {
-		writer.Write([]byte(err.Error()))
+		writer.Write(UploadError(err))
 		return
 	}
 	defer file.Close()
+	var maxSize int64 = 1024 * 1024 * 128
+	if fileHeader.Size > maxSize {
+		writer.Write(UploadError(errors.New(fmt.Sprintf("single file too large more than %d bytes", maxSize))))
+		return
+	}
 	// 是否校验文件类型
 	if save.Verify {
 		fileType := request.Header.Get("type")
 		if fileType == "" {
-			writer.Write([]byte(`Missing parameters 'type' in the http request header`))
+			writer.Write(UploadError(errors.New("missing parameters 'type' in the http request header")))
 			return
 		}
 		err = UploadFileFormatVerify(fileType, path.Ext(fileHeader.Filename))
 		if err != nil {
-			writer.Write([]byte(err.Error()))
+			writer.Write(UploadError(err))
 			return
 		}
 	}
@@ -74,7 +79,7 @@ func Up(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
-			writer.Write([]byte(err.Error()))
+			writer.Write(UploadError(err))
 			return
 		}
 	}
@@ -83,13 +88,13 @@ func Up(writer http.ResponseWriter, request *http.Request) {
 	saveFile := fmt.Sprintf("%s%s%s", dir, saveName, suffix)
 	out, err := os.OpenFile(saveFile, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		writer.Write([]byte(err.Error()))
+		writer.Write(UploadError(err))
 		return
 	}
 	defer out.Close()
 	_, err = io.Copy(out, file)
 	if err != nil {
-		writer.Write([]byte(err.Error()))
+		writer.Write(UploadError(err))
 		return
 	}
 	save.NetDir = fmt.Sprintf("%s%s%s", dateDir, saveName, suffix)
@@ -121,22 +126,30 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 	// 字节byte:8个二进制位为一个字节(B),最常用的单位
 	err := request.ParseMultipartForm(1024 * 1024 * 256)
 	if err != nil {
-		writer.Write([]byte(err.Error()))
+		// HTTP请求大小超过256M
+		writer.Write(UploadError(err))
 		return
 	}
 	form := request.MultipartForm
 	files := form.File[saves.HTMLFormFileName]
+	var singleFileMaxSize int64 = 1024 * 1024 * 128
+	for _, file := range files {
+		if file.Size > singleFileMaxSize {
+			writer.Write(UploadError(errors.New(fmt.Sprintf("single file too large more than %d bytes", singleFileMaxSize))))
+			return
+		}
+	}
 	// 是否校验文件类型
 	if saves.Verify {
 		fileType := request.Header.Get("type")
 		if fileType == "" {
-			writer.Write([]byte(`Missing parameters 'type' in the http request header`))
+			writer.Write(UploadError(errors.New("missing parameters 'type' in the http request header")))
 			return
 		}
 		for _, file := range files {
 			err = UploadFileFormatVerify(fileType, path.Ext(file.Filename))
 			if err != nil {
-				writer.Write([]byte(err.Error()))
+				writer.Write(UploadError(err))
 				return
 			} else {
 				continue
@@ -153,6 +166,7 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 	}
 	bytes, _ := json.Marshal(saves.NetDir)
 	writer.Write([]byte(fmt.Sprintf(`{"code":0,"msg":"success","data":%s}`, string(bytes))))
+	return
 }
 
 // <html>
@@ -292,6 +306,11 @@ func UploadFileFormatVerifyJudge(lists []string, uploadFileSuffix string) error 
 		}
 	}
 	return nil
+}
+
+// UploadError upload error
+func UploadError(err error) []byte {
+	return []byte(fmt.Sprintf(`{"code":-1,"msg":"%s"}`, err.Error()))
 }
 
 // main program entry
