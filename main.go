@@ -98,7 +98,7 @@ func Up(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	save.NetDir = fmt.Sprintf("%s%s%s", dateDir, saveName, suffix)
-	writer.Write([]byte(fmt.Sprintf(`{"code":0,"msg":"success","data":%s}`, save.NetDir)))
+	writer.Write([]byte(fmt.Sprintf(`{"code":0,"msg":"success","data":"%s"}`, save.NetDir)))
 	return
 }
 
@@ -133,26 +133,22 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 	form := request.MultipartForm
 	files := form.File[saves.HTMLFormFileName]
 	var singleFileMaxSize int64 = 1024 * 1024 * 128
+	fileType := request.Header.Get("type")
 	for _, file := range files {
 		if file.Size > singleFileMaxSize {
 			writer.Write(UploadError(errors.New(fmt.Sprintf("single file too large more than %d bytes", singleFileMaxSize))))
 			return
 		}
-	}
-	// 是否校验文件类型
-	if saves.Verify {
-		fileType := request.Header.Get("type")
-		if fileType == "" {
-			writer.Write(UploadError(errors.New("missing parameters 'type' in the http request header")))
-			return
-		}
-		for _, file := range files {
+		// 是否校验文件类型
+		if saves.Verify {
+			if fileType == "" {
+				writer.Write(UploadError(errors.New("missing parameters 'type' in the http request header")))
+				return
+			}
 			err = UploadFileFormatVerify(fileType, path.Ext(file.Filename))
 			if err != nil {
 				writer.Write(UploadError(err))
 				return
-			} else {
-				continue
 			}
 		}
 	}
@@ -270,7 +266,7 @@ func UploadFileFormatVerify(uploadFileType string, uploadFileSuffix string) erro
 	case "image":
 		return UploadFileFormatVerifyJudge([]string{".png", ".jpg", ".jpeg", ".gif", ".psd", ".swf", ".bmp", ".emf"}, uploadFileSuffix)
 	case "icon":
-		return UploadFileFormatVerifyJudge([]string{".icon"}, uploadFileSuffix)
+		return UploadFileFormatVerifyJudge([]string{".ico", ".icon"}, uploadFileSuffix)
 	case "audio":
 		return UploadFileFormatVerifyJudge([]string{".mp3", ".midi", ".wma", ".wave", ".emf"}, uploadFileSuffix)
 	case "video":
