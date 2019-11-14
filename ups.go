@@ -13,6 +13,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -35,6 +36,7 @@ type CommandLineArgument struct {
 	Size   int64
 	Body   int64
 	Ds     string
+	Daemon bool
 }
 
 // 返回信息
@@ -57,10 +59,26 @@ func FlagParse() {
 	flag.StringVar(&Cla.Prefix, "prefix", "uploads", "保存目录前缀")
 	flag.Int64Var(&Cla.Size, "size", 1024*1024*128, "单文件最大限制")
 	flag.Int64Var(&Cla.Body, "body", 1024*1024*1280, "HTTP请求体最大限制")
+	// daemon
+	flag.BoolVar(&Cla.Daemon, "d", false, "以守护进程运行,使用 -d=true or -d")
 	flag.Parse()
 	Cla.Ds = string(filepath.Separator)
 	if !strings.HasSuffix(Cla.Upload, Cla.Ds) {
 		Cla.Upload = Cla.Upload + Cla.Ds
+	}
+	// daemon
+	if Cla.Daemon {
+		args := os.Args[1:]
+		for i := 0; i < len(args); i++ {
+			if args[i] == "-d=true" || args[i] == "-d" {
+				args[i] = "-d=false"
+				break
+			}
+		}
+		cmd := exec.Command(os.Args[0], args...)
+		cmd.Start()
+		fmt.Println("[PID]", cmd.Process.Pid)
+		os.Exit(0)
 	}
 }
 
