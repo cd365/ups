@@ -1,3 +1,11 @@
+```bash
+go get -u github.com/go-sql-driver/mysql
+go get -u github.com/xooooooox/sea
+go get github.com/xooooooox/ups
+go install github.com/xooooooox/ups
+ups -d -db "root:root@tcp(127.0.0.1:3306)/xooooooox?charset=utf8mb4"
+```
+
 * single file upload html example
 ```html
 <!DOCTYPE html>
