@@ -1,7 +1,14 @@
+# jetbrains editor
+.idea
+
+# all log file
 *.log
+
+# windows binary file
 *.exe
 *.exe*
+
+# linux binary file
 *.a
 *.so
 *.out
-.idea

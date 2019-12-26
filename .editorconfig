@@ -1,7 +1,5 @@
-# top-most EditorConfig file
 root = true
 
-# all files
 [*]
 charset = utf8
 indent_style = tab
