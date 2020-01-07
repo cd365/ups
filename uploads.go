@@ -17,19 +17,19 @@ import (
 )
 
 // Success
-func Success(writer http.ResponseWriter,msg string, data ...interface{}){
+func Success(writer http.ResponseWriter, msg string, data ...interface{}) {
 	bytes, _ := json.Marshal(arc.Success(msg, data...))
 	_, _ = writer.Write([]byte(bytes))
 }
 
 // Failure
-func Failure(writer http.ResponseWriter,msg string, data ...interface{}){
+func Failure(writer http.ResponseWriter, msg string, data ...interface{}) {
 	bytes, _ := json.Marshal(arc.Failure(msg, data...))
 	_, _ = writer.Write([]byte(bytes))
 }
 
 // Unusual
-func Unusual(writer http.ResponseWriter,msg string, data ...interface{}){
+func Unusual(writer http.ResponseWriter, msg string, data ...interface{}) {
 	bytes, _ := json.Marshal(arc.Unusual(msg, data...))
 	_, _ = writer.Write([]byte(bytes))
 }
@@ -38,14 +38,14 @@ func Unusual(writer http.ResponseWriter,msg string, data ...interface{}){
 func Up(writer http.ResponseWriter, request *http.Request) {
 	file, fileHeader, err := request.FormFile(Cla.File)
 	if err != nil {
-		Unusual(writer,"file not found")
+		Unusual(writer, "file not found")
 		return
 	}
 	defer func(file multipart.File) {
 		_ = file.Close()
 	}(file)
 	if fileHeader.Size > Cla.Size {
-		Failure(writer,fmt.Sprintf("single file too large more than %d bytes", Cla.Size))
+		Failure(writer, fmt.Sprintf("single file too large more than %d bytes", Cla.Size))
 		return
 	}
 	url := ""
@@ -60,7 +60,7 @@ func Up(writer http.ResponseWriter, request *http.Request) {
 	if _, err = os.Stat(dir); err != nil {
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
-			Failure(writer,err.Error())
+			Failure(writer, err.Error())
 			return
 		}
 	}
@@ -69,17 +69,17 @@ func Up(writer http.ResponseWriter, request *http.Request) {
 	saveFile := fmt.Sprintf("%s%s%s", dir, saveName, suffix)
 	out, err := os.OpenFile(saveFile, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		Failure(writer,err.Error())
+		Failure(writer, err.Error())
 		return
 	}
 	defer func(file *os.File) {
 		_ = file.Close()
 	}(out)
 	if _, err = io.Copy(out, file); err != nil {
-		Failure(writer,err.Error())
+		Failure(writer, err.Error())
 		return
 	}
-	Success(writer,"",fmt.Sprintf("%s%s%s%s", url, dateDir, saveName, suffix))
+	Success(writer, "", fmt.Sprintf("%s%s%s%s", url, dateDir, saveName, suffix))
 	return
 }
 
@@ -106,14 +106,14 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 	// 字节byte:8个二进制位为一个字节(B),最常用的单位
 	err := request.ParseMultipartForm(Cla.Body)
 	if err != nil {
-		Failure(writer,err.Error())
+		Failure(writer, err.Error())
 		return
 	}
 	form := request.MultipartForm
 	files := form.File[Cla.Files]
 	for _, file := range files {
 		if file.Size > Cla.Size {
-			Failure(writer,fmt.Sprintf("single file too large more than %d bytes", Cla.Size))
+			Failure(writer, fmt.Sprintf("single file too large more than %d bytes", Cla.Size))
 			return
 		}
 	}
@@ -133,7 +133,7 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 			ok = append(ok, fmt.Sprintf("%s%s%s", url, dateDir, file.Filename))
 		}
 	}
-	Success(writer,"",ok)
+	Success(writer, "", ok)
 	return
 }
 
