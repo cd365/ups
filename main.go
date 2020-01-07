@@ -34,16 +34,16 @@ func init() {
 	// rand seed
 	rand.Seed(time.Now().UnixNano())
 	// flag parse
-	flag.UintVar(&Cla.Port, "port", 8001, "端口")
-	flag.StringVar(&Cla.Name, "name", "ups", "名称")
-	flag.StringVar(&Cla.File, "file", "file", "单文件名称")
-	flag.StringVar(&Cla.Files, "files", "files[]", "多文件名称")
-	flag.StringVar(&Cla.Upload, "upload", "/var/www/", "保存目录")
-	flag.StringVar(&Cla.Prefix, "prefix", "uploads", "保存目录前缀")
-	flag.Int64Var(&Cla.Size, "size", 1024*1024*128, "单文件最大限制")
-	flag.Int64Var(&Cla.Body, "body", 1024*1024*1280, "HTTP请求体最大限制")
+	flag.UintVar(&Cla.Port, "port", 8001, "service port")
+	flag.StringVar(&Cla.Name, "name", "ups", "name")
+	flag.StringVar(&Cla.File, "file", "file", "single file name in html form")
+	flag.StringVar(&Cla.Files, "files", "files[]", "more files name in html form")
+	flag.StringVar(&Cla.Upload, "upload", "/var/www/", "save directory")
+	flag.StringVar(&Cla.Prefix, "prefix", "uploads", "prefix save directory")
+	flag.Int64Var(&Cla.Size, "size", 1024*1024*128, "max size of single file")
+	flag.Int64Var(&Cla.Body, "body", 1024*1024*1280, "max size of http request body")
 	// daemon run
-	flag.BoolVar(&Cla.Daemon, "d", false, "以守护进程运行,使用 -d=true or -d")
+	flag.BoolVar(&Cla.Daemon, "d", false, "run as a daemon,use -d=true or -d")
 	flag.Parse()
 	Cla.Ds = string(filepath.Separator)
 	if !strings.HasSuffix(Cla.Upload, Cla.Ds) {
