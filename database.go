@@ -1,3 +1,5 @@
+// Copyright (C) xooooooox
+
 package main
 
 import (
@@ -7,8 +9,5 @@ import (
 // Insert upload files
 func Insert(insert ...interface{}) error {
 	_, err := sea.Add(insert...)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

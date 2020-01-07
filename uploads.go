@@ -1,3 +1,5 @@
+// Copyright (C) xooooooox
+
 package main
 
 import (
@@ -116,12 +118,11 @@ func Up(writer http.ResponseWriter, request *http.Request) {
 
 // Ups more files uploads
 func Ups(writer http.ResponseWriter, request *http.Request) {
-	// 8bit(位)=1Byte(字节)
-	// 1024Byte(字节)=1KB
+	// 8bit(位)=1byte(字节)
+	// 1024byte=1KB
 	// 1024KB=1MB
 	// 1024MB=1GB
-	// 计算机存储单位一般用bit,B,KB,MB,GB,TB,PB,EB,ZB,YB,BB,NB,DB
-	// 字节byte:8个二进制位为一个字节(B),最常用的单位
+	// computer storage unit is generally used:bit,B,KB,MB,GB,TB,PB,EB,ZB,YB,BB,NB,DB
 	err := request.ParseMultipartForm(Cla.Body)
 	if err != nil {
 		Failure(writer, err.Error())
