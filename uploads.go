@@ -81,22 +81,22 @@ func Up(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	uri := fmt.Sprintf("%s%s%s%s", url, dateDir, saveName, suffix)
-	defer func(uri string,req *http.Request) {
+	defer func(uri string, req *http.Request) {
 		_ = request.ParseForm()
 		itype, _ := strconv.ParseInt(request.PostFormValue("type"), 10, 64)
 		igroup, _ := strconv.ParseInt(request.PostFormValue("group"), 10, 64)
 		iowner, _ := strconv.ParseInt(request.PostFormValue("owner"), 10, 64)
 		_ = Insert(&Resources{
-			Type:itype,
-			Group:igroup,
-			Owner:iowner,
-			Uri:uri,
-			Time:time.Now().Unix(),
-			Keyword:request.PostFormValue("keyword"),
-			Title:request.PostFormValue("title"),
-			Note:request.PostFormValue("note"),
+			Type:    itype,
+			Group:   igroup,
+			Owner:   iowner,
+			Uri:     uri,
+			Time:    time.Now().Unix(),
+			Keyword: request.PostFormValue("keyword"),
+			Title:   request.PostFormValue("title"),
+			Note:    request.PostFormValue("note"),
 		})
-	}(uri,request)
+	}(uri, request)
 	Success(writer, "", uri)
 	return
 }
@@ -151,25 +151,25 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 			ok = append(ok, fmt.Sprintf("%s%s%s", url, dateDir, file.Filename))
 		}
 	}
-	defer func(uri []string,req *http.Request) {
+	defer func(uri []string, req *http.Request) {
 		_ = request.ParseForm()
 		itype, _ := strconv.ParseInt(request.PostFormValue("type"), 10, 64)
 		igroup, _ := strconv.ParseInt(request.PostFormValue("group"), 10, 64)
 		iowner, _ := strconv.ParseInt(request.PostFormValue("owner"), 10, 64)
 		length := len(uri)
-		for i:=0;i<length ;i++  {
+		for i := 0; i < length; i++ {
 			_ = Insert(&Resources{
-				Type:itype,
-				Group:igroup,
-				Owner:iowner,
-				Uri:uri[i],
-				Time:time.Now().Unix(),
-				Keyword:request.PostFormValue("keyword"),
-				Title:request.PostFormValue("title"),
-				Note:request.PostFormValue("note"),
+				Type:    itype,
+				Group:   igroup,
+				Owner:   iowner,
+				Uri:     uri[i],
+				Time:    time.Now().Unix(),
+				Keyword: request.PostFormValue("keyword"),
+				Title:   request.PostFormValue("title"),
+				Note:    request.PostFormValue("note"),
 			})
 		}
-	}(ok,request)
+	}(ok, request)
 	Success(writer, "", ok)
 	return
 }
