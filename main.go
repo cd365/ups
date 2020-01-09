@@ -59,9 +59,7 @@ func init() {
 	}
 	db.SetMaxIdleConns(3)
 	db.SetMaxOpenConns(5)
-	if sea.Instance(db) != nil {
-		log.Fatalln(err)
-	}
+	sea.DB = db
 	Cla.Ds = string(filepath.Separator)
 	if !strings.HasSuffix(Cla.Upload, Cla.Ds) {
 		Cla.Upload = Cla.Upload + Cla.Ds
