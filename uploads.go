@@ -18,8 +18,8 @@ import (
 
 // http json response
 type HttpJsonResponse struct {
-	Code int         `json:"code,omitempty"`
-	Msg  string      `json:"msg,omitempty"`
+	Code int         `json:"code"`
+	Msg  string      `json:"msg"`
 	Data interface{} `json:"data,omitempty"`
 }
 
