@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/xooooooox/arc"
 	"io"
+	"log"
 	"math/rand"
 	"mime/multipart"
 	"net/http"
@@ -16,29 +16,61 @@ import (
 	"time"
 )
 
-// Success
+// http json response
+type HttpJsonResponse struct {
+	Code int         `json:"code,omitempty"`
+	Msg  string      `json:"msg,omitempty"`
+	Data interface{} `json:"data,omitempty"`
+}
+
+// http write error
+func HttpWriteError(err error) {
+	if err != nil {
+		log.Println(err.Error())
+	}
+}
+
+// Success 0
 func Success(writer http.ResponseWriter, msg string, data ...interface{}) {
-	bytes, _ := json.Marshal(arc.Success(msg, data...))
-	_, _ = writer.Write([]byte(bytes))
+	success := &HttpJsonResponse{
+		Code: 0,
+		Msg:  msg,
+		Data: data,
+	}
+	bs, _ := json.Marshal(success)
+	_, err := writer.Write(bs)
+	HttpWriteError(err)
 }
 
-// Failure
+// Failure 1
 func Failure(writer http.ResponseWriter, msg string, data ...interface{}) {
-	bytes, _ := json.Marshal(arc.Failure(msg, data...))
-	_, _ = writer.Write([]byte(bytes))
+	failure := &HttpJsonResponse{
+		Code: 1,
+		Msg:  msg,
+		Data: data,
+	}
+	bs, _ := json.Marshal(failure)
+	_, err := writer.Write(bs)
+	HttpWriteError(err)
 }
 
-// Unusual
+// Unusual 2
 func Unusual(writer http.ResponseWriter, msg string, data ...interface{}) {
-	bytes, _ := json.Marshal(arc.Unusual(msg, data...))
-	_, _ = writer.Write([]byte(bytes))
+	unusual := &HttpJsonResponse{
+		Code: 2,
+		Msg:  msg,
+		Data: data,
+	}
+	bs, _ := json.Marshal(unusual)
+	_, err := writer.Write(bs)
+	HttpWriteError(err)
 }
 
 // Up single file upload
 func Up(writer http.ResponseWriter, request *http.Request) {
 	file, fileHeader, err := request.FormFile(Cla.File)
 	if err != nil {
-		Unusual(writer, "file not found")
+		Unusual(writer, "file is not found")
 		return
 	}
 	defer func(file multipart.File) {
