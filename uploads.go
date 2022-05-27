@@ -160,9 +160,9 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 	dir := fmt.Sprintf("%s%s", prefixDir, dateDir)
 	ok := []string{}
 	for _, file := range files {
-		file.Filename = string(Md5([]byte(fmt.Sprintf("%d%d%d%d", time.Now().UnixNano(), rand.Intn(10), rand.Intn(10), rand.Intn(10))))) + path.Ext(file.Filename)
-		if _, err := MoreFileUploads(file, dir); err == nil {
-			ok = append(ok, fmt.Sprintf("%s%s%s", url, dateDir, file.Filename))
+		filename := string(Md5([]byte(fmt.Sprintf("%d%d%d%d", time.Now().UnixNano(), rand.Intn(10), rand.Intn(10), rand.Intn(10))))) + path.Ext(file.Filename)
+		if _, err := MoreFileUploads(file, dir, filename); err == nil {
+			ok = append(ok, fmt.Sprintf("%s%s%s", url, dateDir, filename))
 		}
 	}
 	Success(writer, "", ok)
@@ -183,7 +183,7 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 // </html>
 
 // MoreFileUploads more files uploads
-func MoreFileUploads(fh *multipart.FileHeader, destDirectory string) (int64, error) {
+func MoreFileUploads(fh *multipart.FileHeader, destDirectory string, filename string) (int64, error) {
 	src, err := fh.Open()
 	if err != nil {
 		return 0, err
@@ -198,7 +198,7 @@ func MoreFileUploads(fh *multipart.FileHeader, destDirectory string) (int64, err
 			return 0, err
 		}
 	}
-	out, err := os.OpenFile(filepath.Join(destDirectory, fh.Filename), os.O_WRONLY|os.O_CREATE, os.FileMode(0666))
+	out, err := os.OpenFile(filepath.Join(destDirectory, filename), os.O_WRONLY|os.O_CREATE, os.FileMode(0666))
 	if err != nil {
 		return 0, err
 	}
