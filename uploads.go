@@ -140,6 +140,7 @@ func Ups(writer http.ResponseWriter, request *http.Request) {
 		Failure(writer, err.Error())
 		return
 	}
+	defer request.MultipartForm.RemoveAll()
 	form := request.MultipartForm
 	files := form.File[Cla.Files]
 	for _, file := range files {
